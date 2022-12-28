@@ -30,18 +30,18 @@ import { fetchCountries } from './fetchCountries';
 
 const DEBOUNCE_DELAY = 300;
 
-const searchCountry = document.querySelector('#search-box');
+const searchCountries = document.querySelector('#search-box');
 const countryList = document.querySelector('.country-list');
 const countryInfo = document.querySelector('.country-info');
-
-searchCountry.addEventListener('input', debounce(textOut, DEBOUNCE_DELAY));
+searchCountries.addEventListener('input', debounce(textOut, DEBOUNCE_DELAY));
 
 function textOut() {
-  // console.log(searchCountry.value);
-  Notiflix.Notify.success(`textOut = ${searchCountry.value} `);
-  console.log(fetchCountries(searchCountry.value));
+  // console.log(searchCountries.value);
+  Notiflix.Notify.success(`textOut = ${searchCountries.value} `);
+  fetchCountries(searchCountries.value);
 }
 
+// console.log(test);
 // Notiflix.Notify.success('Sol lucet omnibus');
 // Notiflix.Notify.failure('Qui timide rogat docet negare');
 // Notiflix.Notify.warning('Memento te hominem esse');
