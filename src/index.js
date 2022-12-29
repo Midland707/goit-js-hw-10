@@ -38,7 +38,30 @@ searchCountries.addEventListener('input', debounce(textOut, DEBOUNCE_DELAY));
 function textOut() {
   // console.log(searchCountries.value);
   Notiflix.Notify.success(`textOut = ${searchCountries.value} `);
-  fetchCountries(searchCountries.value);
+  // fetchCountries(searchCountries.value);
+
+  fetchCountries(searchCountries.value).then(data => {
+    console.log('data', data);
+    for (let i = 0; i < data.length; i += 1) {
+      // console.log('arrayCountries', data[i]);
+      const { name, capital, population, flags, languages } = data[i];
+      // console.log('Повна назва країни :', name.official);
+      // console.log('Столиця :', capital.toString());
+      // console.log('Населення :', population);
+      // console.log('Зображення прапора :', flags.svg);
+      // console.log('Масив мов :', Object.values(languages).toString());
+      countryInfo.insertAdjacentHTML(
+        'beforeend',
+        `<div><img  src="${
+          flags.svg
+        }" alt="flag of contry" width="50" height="50">
+      <a style="font-size:40px"> ${name.official}</a>
+      <p>capital : ${capital.toString()}</p>
+      <p>population : ${population}</p>
+      <p>languages : ${Object.values(languages).toString()}</p></div>`
+      );
+    }
+  });
 }
 
 // console.log(test);
