@@ -16,11 +16,6 @@ function fetchCountries(name) {
       if (!resp.ok) throw new Error(resp.statusText);
       return resp.json();
     })
-    .then(data => {
-      return data;
-    })
-    .catch(error => {
-      console.log(error);
-    });
+    .catch(error => console.log(error));
 }
 export { fetchCountries };

@@ -31,41 +31,84 @@ import { fetchCountries } from './fetchCountries';
 const DEBOUNCE_DELAY = 300;
 
 const searchCountries = document.querySelector('#search-box');
-const countryList = document.querySelector('.country-list');
-const countryInfo = document.querySelector('.country-info');
+const countryListQuery = document.querySelector('.country-list');
+const countryInfoQuery = document.querySelector('.country-info');
+
+let searchCountriesItems;
+let countryList;
+let countryInfo;
+
 searchCountries.addEventListener('input', debounce(textOut, DEBOUNCE_DELAY));
 
-function textOut() {
-  // console.log(searchCountries.value);
-  Notiflix.Notify.success(`textOut = ${searchCountries.value} `);
-  // fetchCountries(searchCountries.value);
-
-  fetchCountries(searchCountries.value).then(data => {
-    console.log('data', data);
-    for (let i = 0; i < data.length; i += 1) {
-      // console.log('arrayCountries', data[i]);
-      const { name, capital, population, flags, languages } = data[i];
-      // console.log('Повна назва країни :', name.official);
-      // console.log('Столиця :', capital.toString());
-      // console.log('Населення :', population);
-      // console.log('Зображення прапора :', flags.svg);
-      // console.log('Масив мов :', Object.values(languages).toString());
-      countryInfo.insertAdjacentHTML(
-        'beforeend',
-        `<div><img  src="${
-          flags.svg
-        }" alt="flag of contry" width="50" height="50">
-      <a style="font-size:40px"> ${name.official}</a>
-      <p>capital : ${capital.toString()}</p>
-      <p>population : ${population}</p>
-      <p>languages : ${Object.values(languages).toString()}</p></div>`
-      );
-    }
-  });
+function createItems(className, selector) {
+  const element = document.createElement('div');
+  element.classList = className;
+  selector.append(element);
+  return element;
 }
 
-// console.log(test);
-// Notiflix.Notify.success('Sol lucet omnibus');
-// Notiflix.Notify.failure('Qui timide rogat docet negare');
-// Notiflix.Notify.warning('Memento te hominem esse');
-// Notiflix.Notify.info('Cogito ergo sum');
+function createCountryList(flags, name) {
+  countryList.insertAdjacentHTML(
+    'beforeend',
+    `
+  <li class="countryItem">
+  <img  src="${flags}"alt="flag of contry" width="50" height="50">
+  <a style="font-size:40px"> ${name}</a>
+  </li>`
+  );
+}
+
+function createCountryInfo(flags, name, capital, population, languages) {
+  searchCountriesItems.remove();
+  countryInfo.insertAdjacentHTML(
+    'beforeend',
+    `<div class="infoItem"><img  src="${flags}"
+      alt="flag of contry" width="50" height="50">
+      <a style="font-size:40px"> ${name}</a>
+      <p>capital : ${capital}</p>
+      <p>population : ${population}</p>
+      <p>languages : ${languages}</p></div>`
+  );
+}
+
+function textOut() {
+  fetchCountries(searchCountries.value.trim())
+    .then(data => {
+      searchCountriesItems = document.querySelector('.countryItems');
+      const searchInfoItems = document.querySelector('.infoItems');
+      if (searchCountriesItems) searchCountriesItems.remove();
+      if (searchInfoItems) searchInfoItems.remove();
+      countryInfo = createItems('infoItems', countryInfoQuery);
+      countryList = createItems('countryItems', countryListQuery);
+      if (searchCountries.value !== '') {
+        if (data.length > 10)
+          return Notiflix.Notify.info(
+            'Too many matches found. Please enter a more specific name.'
+          );
+        for (let i = 0; i < data.length; i += 1) {
+          const { name, capital, population, flags, languages } = data[i];
+
+          if (data.length === 1) {
+            createCountryInfo(
+              flags.svg,
+              name.official,
+              capital.toString(),
+              population,
+              Object.values(languages).toString()
+            );
+          } else createCountryList(flags.svg, name.official);
+        }
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      Notiflix.Notify.failure('ops, there is no country with that name');
+    });
+}
+
+// const { name, capital, population, flags, languages } = data[i];
+// console.log('Повна назва країни :', name.official);
+// console.log('Столиця :', capital.toString());
+// console.log('Населення :', population);
+// console.log('Зображення прапора :', flags.svg);
+// console.log('Масив мов :', Object.values(languages).toString());
