@@ -9,6 +9,8 @@
 // flags.svg - посилання на зображення прапора
 // languages - масив мов
 
+import Notiflix from 'notiflix';
+
 function fetchCountries(name) {
   const URL = 'https://restcountries.com/v3.1/name';
   return fetch(`${URL}/${name}?fields=name,capital,population,flags,languages`)
@@ -16,6 +18,9 @@ function fetchCountries(name) {
       if (!resp.ok) throw new Error(resp.statusText);
       return resp.json();
     })
-    .catch(error => console.log(error));
+    .catch(error => {
+      console.log(error);
+      Notiflix.Notify.failure('ops, there is no country with that name');
+    });
 }
 export { fetchCountries };

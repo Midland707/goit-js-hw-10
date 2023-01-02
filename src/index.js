@@ -38,6 +38,49 @@ let searchCountriesItems;
 let countryList;
 let countryInfo;
 
+const styles = document.querySelector('body');
+const loadStyles = `<style>
+  #search-box {
+    margin-top: 40px;
+    margin-left: 40px;
+    width: 300px;
+  }
+  #search-box:focus {
+    border:2px solid blue;
+    box-shadow: 0 0 10px #719ECE;
+  }
+  .countryItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    list-style: none;
+  }
+  .countryTitle {
+    font-size:20px
+  }
+  .country-info {
+    margin-left: 40px; 
+  }
+  .infoItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .infoItemTitle {
+    font-size: 30px;
+    font-weight: bold;
+  }
+  .infoItemParamBox {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .infoItemValue {
+    font-size: 20px;
+    font-weight: normal;
+  }
+  </style>`;
+styles.insertAdjacentHTML('beforeend', loadStyles);
+
 searchCountries.addEventListener('input', debounce(textOut, DEBOUNCE_DELAY));
 
 function createItems(className, selector) {
@@ -52,58 +95,63 @@ function createCountryList(flags, name) {
     'beforeend',
     `
   <li class="countryItem">
-  <img  src="${flags}"alt="flag of contry" width="50" height="50">
-  <a style="font-size:40px"> ${name}</a>
+  <img src="${flags}"alt="flag of contry" width="40">
+  <span class="countryTitle"> ${name}</span>
   </li>`
   );
 }
 
 function createCountryInfo(flags, name, capital, population, languages) {
-  searchCountriesItems.remove();
+  if (searchCountriesItems) searchCountriesItems.remove();
   countryInfo.insertAdjacentHTML(
     'beforeend',
-    `<div class="infoItem"><img  src="${flags}"
-      alt="flag of contry" width="50" height="50">
-      <a style="font-size:40px"> ${name}</a>
-      <p>capital : ${capital}</p>
-      <p>population : ${population}</p>
-      <p>languages : ${languages}</p></div>`
+    `<div class="infoItem"><img class="infoItemImage" src="${flags}"
+      alt="flag of contry" width="40">
+      <span class="infoItemTitle">${name}</span></div>
+      <div class="infoItemParamBox"><p class="infoItemParam">Capital : <span class="infoItemValue">${capital}</span></p>
+      <p class="infoItemParam">Population : <span class="infoItemValue">${population}</span></p>
+      <p class="infoItemParam">Languages : <span class="infoItemValue">${languages}</span></p></div>`
   );
 }
 
 function textOut() {
-  fetchCountries(searchCountries.value.trim())
-    .then(data => {
-      searchCountriesItems = document.querySelector('.countryItems');
-      const searchInfoItems = document.querySelector('.infoItems');
-      if (searchCountriesItems) searchCountriesItems.remove();
-      if (searchInfoItems) searchInfoItems.remove();
-      countryInfo = createItems('infoItems', countryInfoQuery);
-      countryList = createItems('countryItems', countryListQuery);
-      if (searchCountries.value !== '') {
-        if (data.length > 10)
-          return Notiflix.Notify.info(
-            'Too many matches found. Please enter a more specific name.'
-          );
-        for (let i = 0; i < data.length; i += 1) {
-          const { name, capital, population, flags, languages } = data[i];
-
-          if (data.length === 1) {
-            createCountryInfo(
-              flags.svg,
-              name.official,
-              capital.toString(),
-              population,
-              Object.values(languages).toString()
+  searchCountriesItems = document.querySelector('.countryItems');
+  const searchInfoItems = document.querySelector('.infoItems');
+  if (searchCountriesItems) searchCountriesItems.remove();
+  if (searchInfoItems) searchInfoItems.remove();
+  countryInfo = createItems('infoItems', countryInfoQuery);
+  countryList = createItems('countryItems', countryListQuery);
+  if (searchCountries.value !== '') {
+    fetchCountries(searchCountries.value.trim())
+      .then(data => {
+        if (data) {
+          if (data.length > 10)
+            return Notiflix.Notify.info(
+              'Too many matches found. Please enter a more specific name.'
             );
-          } else createCountryList(flags.svg, name.official);
+          for (let i = 0; i < data.length; i += 1) {
+            const { name, capital, population, flags, languages } = data[i];
+
+            if (data.length === 1) {
+              createCountryInfo(
+                flags.svg,
+                name.official,
+                capital.toString(),
+                population,
+                Object.values(languages).toString()
+              );
+            } else createCountryList(flags.svg, name.official);
+          }
         }
-      }
-    })
-    .catch(error => {
-      console.log(error);
-      Notiflix.Notify.failure('ops, there is no country with that name');
-    });
+      })
+      .catch(error => {
+        console.log(error);
+        Notiflix.Notify.failure('ops, there is no country with that name');
+      });
+  } else {
+    if (searchCountriesItems) searchCountriesItems.remove();
+    if (searchInfoItems) searchInfoItems.remove();
+  }
 }
 
 // const { name, capital, population, flags, languages } = data[i];
